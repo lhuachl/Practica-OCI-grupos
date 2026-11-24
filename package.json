@@ -11,9 +11,9 @@
     "start": "node --env-file-if-exists=.env server/index.js",
     "dev": "node --watch --env-file-if-exists=.env server/index.js --dev",
     "test": "npm run build && cypress run",
-    "test:unit": "cypress run --spec test/unit/domain.cy.js",
-    "test:integration": "cypress run --spec test/integration/api.cy.js",
-    "test:e2e": "npm run build && cypress run --spec test/e2e/gym.cy.js",
+    "test:unit": "cypress run --spec \"test/unit/*.cy.js\"",
+    "test:integration": "cypress run --spec \"test/integration/*.cy.js\"",
+    "test:e2e": "npm run build && cypress run --spec \"test/e2e/*.cy.js\"",
     "cypress:open": "npm run build && cypress open"
   },
   "dependencies": {
