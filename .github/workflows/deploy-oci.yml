@@ -14,7 +14,48 @@ permissions:
   contents: read
 
 jobs:
+  validar:
+    name: Validar infraestructura antes del despliegue
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.14.4'
+      - name: Verificar Terraform sin credenciales de Oracle
+        run: |
+          terraform fmt -check -recursive infra
+          bootstrap=$(mktemp -d)
+          cp -R infra/bootstrap/. "$bootstrap/"
+          cp infra/oci/.terraform.lock.hcl "$bootstrap/"
+          terraform -chdir="$bootstrap" init -backend=false -lockfile=readonly
+          terraform -chdir="$bootstrap" test
+          terraform -chdir=infra/oci init -backend=false -lockfile=readonly
+          terraform -chdir=infra/oci validate
+      - name: Comprobar los scripts y los playbooks
+        run: |
+          bash -n scripts/deploy-oci.sh
+          python -m py_compile scripts/host-key-cache.py
+          python3.12 -m venv "$RUNNER_TEMP/ansible-env"
+          source "$RUNNER_TEMP/ansible-env/bin/activate"
+          python -m pip install 'ansible-core~=2.20.0'
+          ansible-playbook -i 'localhost,' --syntax-check infra/ansible/site.yml
+          ansible-playbook -i 'localhost,' --syntax-check infra/ansible/dns.yml
+      - name: Probar el contenedor con Caddy y SQLite
+        run: |
+          docker build -t gymturno:local .
+          docker compose up -d --wait
+          curl --retry 6 --retry-connrefused -fsS http://localhost/api/health | jq -e '.status=="ok"'
+          curl -fsS http://localhost/ | grep -q GymTurno
+          member='{"name":"Demo","email":"smoke@example.test","password":"SoloParaCI123","goal":"peso"}'
+          curl -fsS -H 'Content-Type: application/json' -d "$member" http://localhost/api/register | jq -e '.member.name=="Demo"'
+          docker compose up -d --force-recreate --wait app
+          curl -fsS -H 'Content-Type: application/json' -d "$member" http://localhost/api/login | jq -e '.member.name=="Demo"'
+
   deploy:
+    needs: validar
     name: Publicar y desplegar en OCI
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
