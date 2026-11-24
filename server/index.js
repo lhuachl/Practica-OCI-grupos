@@ -1,3 +1,5 @@
+import { monthlyProgress } from './domain/monthlyProgress.js';
+import { createVisitHistory } from './infrastructure/visitHistory.js';
 import express from 'express';
 import { DatabaseSync } from 'node:sqlite';
 import { randomBytes, scrypt, timingSafeEqual, createHash } from 'node:crypto';
@@ -87,6 +89,14 @@ app.post('/api/logout',(req,res) => {
   res.clearCookie('session',cookieOptions).sendStatus(204);
 });
 installAttendance(app, db);
+const visits = createVisitHistory(db);
+app.get('/api/progreso', (req,res) => {
+  if (!req.member) return res.status(401).json({error:'Inicia sesión para ver tu progreso.'});
+  const month = req.query.month;
+  if (typeof month !== 'string' || !/^\d{4}-(0[1-9]|1[0-2])$/.test(month))
+    return res.status(400).json({error:'Selecciona un mes válido.'});
+  res.json(monthlyProgress(visits.daysInMonth(req.member.id, month)));
+});
 app.use('/api/agenda',(req,res,next) => {
   if (!req.member) return res.status(401).json({error:'Inicia sesión para ver tu agenda.'});
   const day = req.query.day;
@@ -138,4 +148,4 @@ app.use((err,req,res,next)=>{
   res.status(err.status || 500).json({error:err.status===400?'Solicitud inválida.':'No se pudo completar la solicitud.'});
 });
 const port=Number(process.env.PORT || 3000);
-app.listen(port,()=>console.log('GymTurno en http://localhost:'+port));
+const server=app.listen(port,()=>console.log('GymTurno en http://localhost:'+server.address().port));

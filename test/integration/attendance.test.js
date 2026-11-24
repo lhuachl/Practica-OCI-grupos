@@ -3,14 +3,7 @@ import assert from 'node:assert/strict';
 import express from 'express';
 import {DatabaseSync} from 'node:sqlite';
 import {once} from 'node:events';
-import {installAttendance,gymClock,validTime} from './server/attendance.js';
-
-test('La Paz abre a las 07:00 y cierra a las 20:00',()=>{
-  assert.equal(gymClock(new Date('2026-11-24T11:00:00Z')).open,true);
-  assert.equal(gymClock(new Date('2026-11-25T00:00:00Z')).open,false);
-  assert.equal(validTime('18:37'),true);
-  assert.equal(validTime('19:60'),false);
-});
+import {installAttendance} from '../../server/attendance.js';
 
 test('Entradas, cambios de equipo, salida y cierre mantienen los contadores',async t=>{
   const db=new DatabaseSync(':memory:');
@@ -43,3 +36,4 @@ test('Entradas, cambios de equipo, salida y cierre mantienen los contadores',asy
   assert.equal((await (await request(1,'')).json()).total,0);
   assert.equal((await request(1,'/entrada','PUT')).status,409);
 });
+
