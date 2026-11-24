@@ -1,0 +1,50 @@
+services:
+  # El enlace HTTPS temporal dirige las visitas al proxy del gimnasio.
+  tunnel:
+    image: cloudflare/cloudflared:latest
+    profiles: [demo]
+    restart: unless-stopped
+    command: tunnel --no-autoupdate --protocol http2 --url http://proxy:80
+    depends_on:
+      - proxy
+
+  app:
+    # APP_IMAGE permite elegir la imagen publicada para el despliegue.
+    image: ${APP_IMAGE:-gymturno:local}
+    environment:
+      DB_PATH: /app/data/gymturno.sqlite
+      COOKIE_SECURE: ${COOKIE_SECURE:-true}
+    restart: unless-stopped
+    volumes:
+      # SQLite queda en un volumen que perdura al reemplazar el contenedor.
+      - gymturno-data:/app/data
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/api/health').then(r => { if (!r.ok) process.exit(1) }).catch(() => process.exit(1))"]
+      interval: 10s
+      timeout: 5s
+      retries: 6
+
+  proxy:
+    image: caddy:2-alpine
+    labels:
+      gym.caddy.config-hash: ${CADDY_CONFIG_HASH:-local}
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+    # Caddy recibe el tráfico web. Express escucha en la red interna de Compose.
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    # Espera a que la API responda a la comprobación de salud.
+    depends_on:
+      app:
+        condition: service_healthy
+
+volumes:
+  gymturno-data:
+  caddy-data:
+  caddy-config:

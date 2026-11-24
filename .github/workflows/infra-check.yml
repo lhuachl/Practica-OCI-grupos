@@ -1,0 +1,49 @@
+name: Verificar infraestructura de GymTurno
+on:
+  push:
+    branches: [dev]
+    paths:
+      - 'infra/**'
+      - 'scripts/deploy-oci.sh'
+      - 'scripts/host-key-cache.py'
+      - 'Dockerfile'
+      - '.dockerignore'
+      - 'compose.yml'
+      - 'Caddyfile'
+      - '.github/workflows/*oci*'
+      - '.github/workflows/infra-check.yml'
+  pull_request:
+    branches: [main]
+permissions:
+  contents: read
+jobs:
+  validar:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: '1.14.4'
+      - name: Verificar Terraform sin credenciales de Oracle
+        run: |
+          terraform fmt -check -recursive infra/oci
+          terraform -chdir=infra/oci init -backend=false -lockfile=readonly
+          terraform -chdir=infra/oci validate
+      - name: Comprobar los scripts y los playbooks
+        run: |
+          bash -n scripts/deploy-oci.sh
+          python -m py_compile scripts/host-key-cache.py
+          pipx install --force 'ansible-core~=2.20.0' --python python3.12
+          ansible-playbook -i 'localhost,' --syntax-check infra/ansible/site.yml
+          ansible-playbook -i 'localhost,' --syntax-check infra/ansible/dns.yml
+      - name: Probar el contenedor con Caddy y SQLite
+        run: |
+          docker build -t gymturno:local .
+          docker compose up -d --wait
+          curl --retry 6 --retry-connrefused -fsS http://localhost/api/health | jq -e '.status=="ok"'
+          curl -fsS http://localhost/ | grep -q GymTurno
+          member='{"name":"Demo","email":"smoke@example.test","password":"SoloParaCI123","goal":"peso"}'
+          curl -fsS -H 'Content-Type: application/json' -d "$member" http://localhost/api/register | jq -e '.member.name=="Demo"'
+          docker compose up -d --force-recreate --wait app
+          curl -fsS -H 'Content-Type: application/json' -d "$member" http://localhost/api/login | jq -e '.member.name=="Demo"'

@@ -6,3 +6,13 @@ data/
 test-results/
 playwright-report/
 test/results/
+
+# Credenciales y estado de Terraform específicos de cada operador.
+.terraform/
+*.tfvars
+*.tfvars.json
+*.tfstate*
+*.tfplan
+*.pem
+*.key
+__pycache__/
