@@ -4,14 +4,14 @@ En `dev`, GitHub ejecuta Cypress y valida los cambios de infraestructura. Un pus
 
 ## Preparar el entorno production
 
-1. En OCI, elige un compartimento, una región, un dominio de disponibilidad y una imagen **Ubuntu 24.04** compatible con la forma solicitada. Verifica la cuota de Compute. Cada demostración consume capacidad y puede generar cargos. Crea o selecciona un bucket privado de Object Storage. El usuario de la API necesita acceso a objetos y bloqueo de estado, red, instancias, volúmenes y captura/lectura/eliminación de historial de consola.
+1. En OCI, elige un compartimento, una región, un dominio de disponibilidad y una imagen **Ubuntu 24.04** compatible con la forma solicitada. Verifica la cuota de Compute. Cada demostración consume capacidad y puede generar cargos. Terraform descubre el namespace y crea el bucket privado Standard `gymturno-tfstate` en ese compartimento antes de iniciar el estado remoto. En ejecuciones posteriores verifica el bucket existente. La identidad del workflow necesita permiso para consultar el namespace y listar, leer y crear buckets. El usuario de la API necesita acceso a objetos y bloqueo de estado, red, instancias, volúmenes y captura/lectura/eliminación de historial de consola.
 2. En Docker Hub, prepara un repositorio público llamado **gymturno** y un token con permiso de escritura.
 3. En este repositorio, abre **Settings → Environments → New environment**, crea **production** y permite despliegues desde **main**. Configura estos nombres en ese entorno.
 
 | Variables | Valor |
 | --- | --- |
 | DOCKERHUB_USERNAME | Usuario propietario del repositorio gymturno |
-| OCI_STATE_BUCKET, OCI_STATE_NAMESPACE | Nombre del bucket y namespace de Object Storage |
+| OCI_STATE_BUCKET, OCI_STATE_NAMESPACE | Opcionales. Permiten conservar un nombre de bucket existente y verificar el namespace esperado |
 | GYM_VM_SSH_PUBLIC_KEY | Línea completa de la clave SSH pública de tu PC |
 | SITE_DOMAIN, CLOUDFLARE_ZONE_ID | Opcionales. Subdominio exclusivo para GymTurno y zona Cloudflare |
 

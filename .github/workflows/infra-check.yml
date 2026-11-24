@@ -27,7 +27,12 @@ jobs:
           terraform_version: '1.14.4'
       - name: Verificar Terraform sin credenciales de Oracle
         run: |
-          terraform fmt -check -recursive infra/oci
+          terraform fmt -check -recursive infra
+          bootstrap=$(mktemp -d)
+          cp -R infra/bootstrap/. "$bootstrap/"
+          cp infra/oci/.terraform.lock.hcl "$bootstrap/"
+          terraform -chdir="$bootstrap" init -backend=false -lockfile=readonly
+          terraform -chdir="$bootstrap" test
           terraform -chdir=infra/oci init -backend=false -lockfile=readonly
           terraform -chdir=infra/oci validate
       - name: Comprobar los scripts y los playbooks

@@ -18,7 +18,7 @@ fi
 
 plan() {
   umask 077
-  local -a required=(OCI_STATE_BUCKET OCI_STATE_NAMESPACE OCI_TFVARS_JSON OCI_API_PRIVATE_KEY GYM_VM_SSH_PUBLIC_KEY GYM_DEPLOY_SSH_KEY VNC_PASSWORD)
+  local -a required=(OCI_TFVARS_JSON OCI_API_PRIVATE_KEY GYM_VM_SSH_PUBLIC_KEY GYM_DEPLOY_SSH_KEY VNC_PASSWORD)
   if [[ -z "$deployment_id" && -n "${SITE_DOMAIN:-}" ]]; then required+=(CLOUDFLARE_ZONE_ID CLOUDFLARE_API_TOKEN); fi
   for name in "${required[@]}"; do
     if [[ -z "${!name}" ]]; then
@@ -49,6 +49,20 @@ plan() {
   jq -er --arg key "$tmp/api.pem" '
     "[DEFAULT]\ntenancy=\(.tenancy_ocid)\nuser=\(.user_ocid)\nfingerprint=\(.fingerprint)\nregion=\(.region)\nkey_file=\($key)"
   ' "$tmp/production.tfvars.json" > "$tmp/oci-config"
+
+  # Resuelve el almacenamiento antes de abrir el estado remoto de la infraestructura.
+  local bootstrap
+  bootstrap=$(mktemp -d "$tmp/bootstrap.XXXXXX")
+  cp infra/bootstrap/main.tf infra/oci/.terraform.lock.hcl "$bootstrap/"
+  export OCI_STATE_BUCKET="${OCI_STATE_BUCKET:-gymturno-tfstate}"
+  jq --arg name "$OCI_STATE_BUCKET" --arg ns "${OCI_STATE_NAMESPACE:-}" \
+    '{settings: {tenancy_ocid,user_ocid,fingerprint,private_key_path,region,compartment_ocid}, bucket_name: $name, expected_namespace: $ns}' \
+    "$tmp/production.tfvars.json" > "$bootstrap/bootstrap.auto.tfvars.json"
+  terraform -chdir="$bootstrap" init -input=false -lockfile=readonly
+  terraform -chdir="$bootstrap" apply -input=false -auto-approve
+  OCI_STATE_NAMESPACE=$(terraform -chdir="$bootstrap" output -raw namespace)
+  export OCI_STATE_NAMESPACE
+  printf 'OCI_STATE_BUCKET=%s\nOCI_STATE_NAMESPACE=%s\n' "$OCI_STATE_BUCKET" "$OCI_STATE_NAMESPACE" >> "$GITHUB_ENV"
 
   "${tf[@]}" init -input=false \
     "-backend-config=bucket=$OCI_STATE_BUCKET" \
