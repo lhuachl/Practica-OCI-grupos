@@ -1,0 +1,39 @@
+{
+  "invalidPassword": "clave-incorrecta",
+  "shortPassword": "corta",
+  "pastMonth": "2024-02",
+  "visit": {
+    "day": "2099-07-20",
+    "otherDay": "2099-07-21",
+    "arrival": "10:20",
+    "departure": "10:50",
+    "updatedDeparture": "11:35",
+    "activeSlot": "12:00",
+    "activeEnd": "12:45"
+  },
+  "breakfast": {
+    "fuerza": "Huevos con pan integral y papaya",
+    "movilidad": "Avena con manzana y yogur",
+    "peso": "Yogur natural con avena y fruta entera",
+    "resistencia": "Avena con leche y plátano",
+    "general": "Pan integral con queso fresco y fruta"
+  },
+  "invalidVisits": [
+    [
+      "06:59",
+      "07:30"
+    ],
+    [
+      "19:30",
+      "20:01"
+    ],
+    [
+      "12:00",
+      "12:00"
+    ],
+    [
+      "17:00",
+      "16:00"
+    ]
+  ]
+}

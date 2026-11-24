@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { createRoot } from 'react-dom/client';
 import './style.css';
+import { MonthlyBoard } from './MonthlyBoard.jsx';
+import { MealPlan } from './MealPlan.jsx';
 import { Sala } from './Sala.jsx';
 
 // La sesión viaja en una cookie y el servidor decide qué datos puede consultar cada socio.
@@ -83,10 +85,11 @@ function Agenda({day}) {
     <p>Los bloques incluyen pausas y cambios de equipo.</p><div className="routine">{agenda.routine.map(ex=><figure key={ex.start}>
       {ex.photo && <img src={'/ejercicios/'+ex.photo+'.jpg'} alt={ex.name} loading="lazy"/>}
       <figcaption><small>{ex.start} – {ex.end}</small><strong>{ex.name}</strong><span>{ex.length} min{ex.machine && ' · '+ex.machine}</span></figcaption></figure>)}</div></> : <p>{agenda.booked?'Completa la hora de salida para generar tu rutina.':'Tu rutina aparecerá aquí cuando elijas el horario.'}</p>}
-    </section></> : !error && <p>Cargando agenda…</p>}</>;
+    </section><MealPlan goal={goal} label={goals[goal]}/></> : !error && <p>Cargando agenda…</p>}</>;
 }
 
 function App() {
+  const [revision,setRevision]=useState(0);
   const [member,setMember] = useState(undefined);
   const [error,setError] = useState('');
   const today = new Date();
@@ -97,9 +100,9 @@ function App() {
     try {await api('logout','POST'); setMember(null); setError('');}
     catch(err){setError(err.message);}
   }
-  return <><header><strong>GymTurno</strong>{member && <button className="link" onClick={logout}>Cerrar sesión</button>}</header>
+  return <><header><div className="brand"><img src="/identidad/gymturno.png" alt="" width="52" height="52"/><strong>GymTurno</strong></div>{member && <button className="link" onClick={logout}>Cerrar sesión</button>}</header>
     {error && <p role="alert">{error}</p>}
-    {member===undefined ? <main>Consultando sesión…</main> : member ? <main><h1>Hola, {member.name}</h1><Sala api={api}/><label className="date">Día de entrenamiento<input type="date" min={localDay} value={day} onChange={e=>setDay(e.target.value)}/></label>
+    {member===undefined ? <main>Consultando sesión…</main> : member ? <main><h1>Hola, {member.name}</h1><MonthlyBoard api={api} today={localDay} revision={revision}/><Sala api={api} onCheckIn={()=>setRevision(value=>value+1)}/><label className="date">Día de entrenamiento<input type="date" min={localDay} value={day} onChange={e=>setDay(e.target.value)}/></label>
       {day>=localDay && <Agenda key={day} day={day}/>}</main> : <Access onMember={setMember}/>}</>;
 }
 

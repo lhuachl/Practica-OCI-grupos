@@ -1,6 +1,6 @@
 import React, {useEffect,useRef,useState} from 'react';
 
-export function Sala({api}) {
+export function Sala({api,onCheckIn}) {
   const [room,setRoom]=useState(null);
   const [error,setError]=useState('');
   const [busy,setBusy]=useState(false);
@@ -23,7 +23,10 @@ export function Sala({api}) {
   },[api]);
   async function change(path,method,data){
     writing.current=true;version.current++;setBusy(true);setError('');
-    try {setRoom(await api('sala/'+path,method,data));}
+    try {
+      setRoom(await api('sala/'+path,method,data));
+      if(path==='entrada' && method==='PUT') onCheckIn();
+    }
     catch(err){setError(err.message);}
     finally{writing.current=false;setBusy(false);}
   }

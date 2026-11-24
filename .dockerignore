@@ -1,0 +1,10 @@
+**
+!Dockerfile
+!package*.json
+!index.html
+!public/
+!public/**
+!src/
+!src/**
+!server/
+!server/**
