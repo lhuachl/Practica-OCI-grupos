@@ -34,7 +34,9 @@ jobs:
         run: |
           bash -n scripts/deploy-oci.sh
           python -m py_compile scripts/host-key-cache.py
-          pipx install --force 'ansible-core~=2.20.0' --python python3.12
+          python3.12 -m venv "$RUNNER_TEMP/ansible-env"
+          source "$RUNNER_TEMP/ansible-env/bin/activate"
+          python -m pip install 'ansible-core~=2.20.0'
           ansible-playbook -i 'localhost,' --syntax-check infra/ansible/site.yml
           ansible-playbook -i 'localhost,' --syntax-check infra/ansible/dns.yml
       - name: Probar el contenedor con Caddy y SQLite
