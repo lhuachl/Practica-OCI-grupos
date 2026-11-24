@@ -1,0 +1,42 @@
+* { box-sizing:border-box }
+body { margin:0; background:#f4f4ea; color:#163c34; font:1rem/1.55 "Segoe UI",sans-serif }
+header,main { max-width:68rem; margin:auto; padding:1.4rem clamp(1.2rem,5vw,4.5rem) }
+header { display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid #b5c4b8 }
+header strong { font-size:1.5rem; letter-spacing:-.07em }
+.access { display:grid; grid-template-columns:1.1fr 1fr; gap:3rem; align-items:center; padding-top:clamp(2rem,7vw,6rem) }
+h1,h2,h3,p { margin:0 0 .8rem }
+h1 { font:500 clamp(2.8rem,7vw,5.8rem)/1.02 Georgia,serif; letter-spacing:-.05em }
+.access section p { max-width:34ch; margin-top:1.5rem; font-size:1.15rem }
+form,.card { background:#fffefa; border:1px solid #c5cfbf; border-radius:1.1rem; padding:clamp(1.2rem,3vw,2rem); margin:1rem 0 }
+label,small { display:block }
+label { font-weight:600; margin: .8rem 0 }
+input,select,button { font:inherit }
+input,select { display:block; width:100%; padding:.65rem; border:1px solid #869b8c; border-radius:.45rem; background:white; color:inherit }
+button { border:0; border-radius:.5rem; background:#1e5448; color:white; font-weight:600; padding:.65rem 1rem; cursor:pointer }
+button:disabled { opacity:.6 }
+form button { width:100%; margin-top:.65rem }
+.link { background:transparent; color:#215746; text-decoration:underline }
+.date { max-width:15rem }
+article { display:flex; flex-wrap:wrap; align-items:center; gap:1.2rem; border-top:1px solid #dce3d6; padding:1rem 0 }
+article ul { flex:1; min-width:12rem; list-style:none; padding:0; margin:0 }
+li small { color:#546c60 }
+ol li { padding:.3rem }
+[role=alert] { color:#982f25 }
+@media(max-width:680px) { .access { grid-template-columns:1fr; gap:.5rem } article button { width:100% } }
+.room{background:#173e36;color:#f8faee;border-radius:1.2rem;padding:clamp(1.3rem,3vw,2.5rem);margin:1.5rem 0}
+.room-head,.arrival{display:flex;flex-wrap:wrap;align-items:center;gap:1rem;justify-content:space-between}
+.total{font:3.6rem Georgia,serif}
+.room-head{margin-bottom:1.5rem}
+.room button{background:#d4ec95;color:#193e35}
+.equipment,.routine{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,150px),1fr));gap:.8rem}
+.equipment>div{border-top:1px solid #71877b;padding:.7rem 0}
+.equipment b,.equipment small{display:block}
+.equipment button{margin-top:.6rem}
+.room [role=alert]{color:#ffd7c6}
+.routine figure{margin:0;background:#f3f4e9;border-radius:.75rem;overflow:hidden}
+.routine img{background:white;width:100%;aspect-ratio:4/3;object-fit:contain;display:block}
+.routine figcaption{padding:.85rem}
+.routine span{display:block;font-size:.9rem}
+.arrival{border:0;padding:0;justify-content:flex-start}
+.arrival button{width:auto}
+
