@@ -1,0 +1,79 @@
+{
+  "member": {
+    "name": "Ana",
+    "email": "socio@example.test",
+    "password": "Gym-pruebas-123",
+    "goal": "peso"
+  },
+  "visit": {
+    "day": "2099-03-15",
+    "invalidDay": "2099-02-30",
+    "slot": "16:00",
+    "departure": "16:45",
+    "minutes": 45
+  },
+  "equipment": {
+    "single": "polea",
+    "alternative": "banco"
+  },
+  "breakfast": {
+    "goal": "resistencia",
+    "dish": "Avena con leche y plátano",
+    "image": "/identidad/resistencia.jpg"
+  },
+  "attendance": {
+    "days": 1,
+    "percent": 8
+  },
+  "goals": [
+    "fuerza",
+    "movilidad",
+    "peso",
+    "resistencia",
+    "general"
+  ],
+  "times": {
+    "start": "07:00",
+    "ends": [
+      "07:01",
+      "07:13",
+      "07:45",
+      "08:00",
+      "20:00"
+    ],
+    "open": "2026-11-24T11:00:00Z",
+    "closed": "2026-11-25T00:00:00Z",
+    "valid": "18:37",
+    "invalid": "19:60"
+  },
+  "progress": [
+    [
+      0,
+      0
+    ],
+    [
+      6,
+      50
+    ],
+    [
+      12,
+      100
+    ],
+    [
+      15,
+      100
+    ]
+  ],
+  "meals": [
+    "Desayuno",
+    "Almuerzo",
+    "Merienda",
+    "Cena"
+  ],
+  "history": {
+    "second": "2026-11-24",
+    "otherMember": "2026-11-25",
+    "nextMonth": "2026-12-01",
+    "first": "2026-11-23"
+  }
+}
