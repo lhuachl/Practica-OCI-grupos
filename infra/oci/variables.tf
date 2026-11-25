@@ -62,8 +62,9 @@ variable "shape" {
 
 variable "flex_shape" {
   type = object({
-    ocpus         = number
-    memory_in_gbs = number
+    ocpus                     = number
+    memory_in_gbs             = number
+    baseline_ocpu_utilization = optional(string)
   })
   default     = null
   description = "CPU y RAM, solo para formas Flex."

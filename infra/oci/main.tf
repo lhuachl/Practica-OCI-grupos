@@ -9,8 +9,9 @@ resource "oci_core_instance" "gym" {
     for_each = var.flex_shape == null ? [] : [var.flex_shape]
 
     content {
-      ocpus         = shape_config.value.ocpus
-      memory_in_gbs = shape_config.value.memory_in_gbs
+      ocpus                     = shape_config.value.ocpus
+      memory_in_gbs             = shape_config.value.memory_in_gbs
+      baseline_ocpu_utilization = shape_config.value.baseline_ocpu_utilization
     }
   }
 
