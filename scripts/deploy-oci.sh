@@ -87,6 +87,9 @@ plan() {
     printf 'El plan elimina o reemplaza recursos. Revísalo antes de desplegar.\n' >&2
     return 1
   fi
+  # Consulta capacidad antes de publicar Docker si el plan crea una VM.
+  "${tf[@]}" show -json "$tmp/gym.tfplan" |
+    python scripts/check-capacity.py "$tmp/oci-config" "$(jq -er '.tenancy_ocid' "$tmp/production.tfvars.json")"
 }
 
 # Lee la clave pública desde la consola autenticada de la instancia creada en OCI.
