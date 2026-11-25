@@ -57,23 +57,14 @@ variable "deploy_ssh_public_key" {
 
 variable "shape" {
   type        = string
-  description = "Forma de la VM disponible en la región y dominio elegidos."
-}
+  default     = "VM.Standard.E2.1.Micro"
+  nullable    = false
+  description = "Unidad elegible para Siempre gratis que usa GymTurno."
 
-variable "fault_domain" {
-  type        = string
-  default     = null
-  description = "Dominio de errores opcional para ubicar la VM de demostración."
-}
-
-variable "flex_shape" {
-  type = object({
-    ocpus                     = number
-    memory_in_gbs             = number
-    baseline_ocpu_utilization = optional(string)
-  })
-  default     = null
-  description = "CPU y RAM, solo para formas Flex."
+  validation {
+    condition     = var.shape == "VM.Standard.E2.1.Micro"
+    error_message = "GymTurno solo admite VM.Standard.E2.1.Micro."
+  }
 }
 
 variable "admin_cidr" {

@@ -5,17 +5,8 @@ on:
     branches: [main]
   workflow_dispatch:
     inputs:
-      demo_e4:
-        description: "Usar la E4 de pago con 2 GB y base al 12,5 % en esta demostración"
-        type: boolean
-        default: false
-      demo_fault_domain:
-        description: "Ubicación opcional para la demostración E4"
-        type: choice
-        options: [auto, FAULT-DOMAIN-1, FAULT-DOMAIN-2, FAULT-DOMAIN-3]
-        default: auto
       resume_run_id:
-        description: "Opcional: ID de la ejecución manual cuya VM quieres terminar de configurar"
+        description: "Opcional: ID de la ejecución manual cuya red o VM quieres reutilizar"
         type: string
         required: false
 
@@ -74,8 +65,6 @@ jobs:
       group: gymturno-production
       cancel-in-progress: false
     env:
-      DEMO_FAULT_DOMAIN: ${{ inputs.demo_fault_domain }}
-      DEMO_E4: ${{ inputs.demo_e4 }}
       RESUME_RUN_ID: ${{ inputs.resume_run_id }}
       OCI_STATE_BUCKET: ${{ vars.OCI_STATE_BUCKET }}
       OCI_STATE_NAMESPACE: ${{ vars.OCI_STATE_NAMESPACE }}

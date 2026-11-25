@@ -40,7 +40,7 @@ Ejemplo de estructura para `OCI_TFVARS_JSON`. Sustituye los marcadores con los v
 }
 ```
 
-Para una forma Flex agrega `flex_shape` con `ocpus` y `memory_in_gbs`. La VCN predeterminada usa 10.41.0.0/16, subred pública 10.41.1.0/24 y privada 10.41.2.0/24. Terraform guarda el estado de producción en `gymturno/production.tfstate` y las demostraciones en `gymturno/manual/<run-id>.tfstate`. El directorio `gymturno/hosts/` conserva la identidad SSH pública verificada de cada VM.
+El despliegue solicita la unidad AMD `VM.Standard.E2.1.Micro` con una imagen Ubuntu 24.04 x86 y deja que OCI elija el dominio de errores. Si OCI informa falta de capacidad después de crear la red, inicia el workflow actualizado desde `main` e indica el ID de la demostración original en `resume_run_id` para reutilizar su estado. La VCN predeterminada usa 10.41.0.0/16, subred pública 10.41.1.0/24 y privada 10.41.2.0/24. Terraform guarda el estado de producción en `gymturno/production.tfstate` y las demostraciones en `gymturno/manual/<run-id>.tfstate`. El directorio `gymturno/hosts/` conserva la identidad SSH pública verificada de cada VM.
 
 ## Qué ocurre durante el despliegue
 

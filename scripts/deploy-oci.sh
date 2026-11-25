@@ -42,12 +42,11 @@ plan() {
   ssh-keygen -l -f "$tmp/vm-access.pub" >/dev/null
 
   # Las claves se escriben en el directorio temporal del runner.
-  jq --arg api "$tmp/api.pem" --arg ssh "$tmp/vm-access.pub" --arg id "$deployment_id" --arg deploy "$deploy_public_key" --arg e4 "${DEMO_E4:-false}" '
+  jq --arg api "$tmp/api.pem" --arg ssh "$tmp/vm-access.pub" --arg id "$deployment_id" --arg deploy "$deploy_public_key" '
     . + {private_key_path: $api, ssh_public_key_path: $ssh, deployment_id: null, deploy_ssh_public_key: $deploy}
     | if $id == "" then . else . + {deployment_id: $id, deploy_ssh_public_key: $deploy, subnet_ocid: null} end
-    # El perfil de pago solo se aplica al estado de la demostración seleccionada.
-    | if $id != "" and $e4 == "true" then . + {shape:"VM.Standard.E4.Flex",flex_shape:{ocpus:1,memory_in_gbs:2,baseline_ocpu_utilization:"BASELINE_1_8"}} else . end
-    | if $id != "" and $e4 == "true" and (env.DEMO_FAULT_DOMAIN // "auto") != "auto" then . + {fault_domain:env.DEMO_FAULT_DOMAIN} else . end
+    # Terraform selecciona la Micro y OCI elige el dominio de errores.
+    | del(.shape, .flex_shape, .fault_domain)
   ' <<< "$OCI_TFVARS_JSON" > "$tmp/production.tfvars.json"
   jq -er --arg key "$tmp/api.pem" '
     "[DEFAULT]\ntenancy=\(.tenancy_ocid)\nuser=\(.user_ocid)\nfingerprint=\(.fingerprint)\nregion=\(.region)\nkey_file=\($key)"

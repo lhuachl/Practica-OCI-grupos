@@ -2,20 +2,9 @@ resource "oci_core_instance" "gym" {
   compartment_id      = var.compartment_ocid
   display_name        = var.deployment_id == null ? "gymturno-web" : "gymturno-web-${var.deployment_id}"
   availability_domain = var.availability_domain
-  fault_domain        = var.fault_domain
   shape               = var.shape
 
-  # Las formas Flex requieren CPU y RAM explícitas. La Micro usa sus recursos fijos.
-  dynamic "shape_config" {
-    for_each = var.flex_shape == null ? [] : [var.flex_shape]
-
-    content {
-      ocpus                     = shape_config.value.ocpus
-      memory_in_gbs             = shape_config.value.memory_in_gbs
-      baseline_ocpu_utilization = shape_config.value.baseline_ocpu_utilization
-    }
-  }
-
+  # OCI elige el dominio de errores disponible al crear la Micro.
   source_details {
     source_type = "image"
     source_id   = var.ubuntu_2404_image_ocid
