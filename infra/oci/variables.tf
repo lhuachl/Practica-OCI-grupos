@@ -60,6 +60,12 @@ variable "shape" {
   description = "Forma de la VM disponible en la región y dominio elegidos."
 }
 
+variable "fault_domain" {
+  type        = string
+  default     = null
+  description = "Dominio de errores opcional para ubicar la VM de demostración."
+}
+
 variable "flex_shape" {
   type = object({
     ocpus                     = number

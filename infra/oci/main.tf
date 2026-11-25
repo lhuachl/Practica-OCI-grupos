@@ -2,6 +2,7 @@ resource "oci_core_instance" "gym" {
   compartment_id      = var.compartment_ocid
   display_name        = var.deployment_id == null ? "gymturno-web" : "gymturno-web-${var.deployment_id}"
   availability_domain = var.availability_domain
+  fault_domain        = var.fault_domain
   shape               = var.shape
 
   # Las formas Flex requieren CPU y RAM explícitas. La Micro usa sus recursos fijos.
