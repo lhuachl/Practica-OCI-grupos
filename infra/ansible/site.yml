@@ -90,6 +90,17 @@
       register: ufw_web
       changed_when: "'Skipping' not in ufw_web.stdout"
 
+    # Regla explícita de iptables para HTTP y HTTPS. UFW conserva el acceso tras reiniciar.
+    - name: Permitir HTTP y HTTPS en iptables
+      ansible.builtin.iptables:
+        chain: INPUT
+        protocol: tcp
+        destination_port: "{{ item }}"
+        jump: ACCEPT
+        action: insert
+        comment: "GymTurno web {{ item }}"
+      loop: [80, 443]
+
     # Autoriza la red administrativa antes de activar el firewall.
     - name: Permitir SSH directo desde la red administrativa
       ansible.builtin.command: "ufw allow from {{ admin_cidr }} to any port 22 proto tcp"
