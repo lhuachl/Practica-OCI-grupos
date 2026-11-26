@@ -1,7 +1,10 @@
-name: Despliegue de GymTurno en OCI
+name: MVP CI/CD Pipeline
 
+# dev: ejecuta las pruebas. main: pruebas, imagen en Docker Hub y despliegue en OCI.
 on:
   push:
+    branches: [dev, main]
+  pull_request:
     branches: [main]
   workflow_dispatch:
     inputs:
@@ -14,8 +17,28 @@ permissions:
   contents: read
 
 jobs:
+  test:
+    name: Pruebas automatizadas
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+      - run: npm ci
+      - run: npx cypress install
+      - name: Pruebas unitarias
+        run: npm run test:unit
+      - name: Pruebas de integración
+        run: npm run test:integration
+      - name: Pruebas E2E
+        run: npm run test:e2e
+
   validar:
     name: Validar infraestructura antes del despliegue
+    needs: test
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 15
@@ -54,9 +77,36 @@ jobs:
           docker compose up -d --force-recreate --wait app
           curl -fsS -H 'Content-Type: application/json' -d "$member" http://localhost/api/login | jq -e '.member.name=="Demo"'
 
-  deploy:
+  docker:
+    name: Construir y publicar la imagen en Docker Hub
     needs: validar
-    name: Publicar y desplegar en OCI
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    environment: production
+    outputs:
+      digest: ${{ steps.image.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-qemu-action@v3
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - uses: docker/build-push-action@v6
+        id: image
+        with:
+          context: .
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ${{ vars.DOCKERHUB_USERNAME }}/gymturno:latest
+            ${{ vars.DOCKERHUB_USERNAME }}/gymturno:${{ github.sha }}
+
+  deploy:
+    name: Crear la VM con Terraform y configurarla con Ansible
+    needs: docker
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
     timeout-minutes: 35
@@ -93,23 +143,9 @@ jobs:
       - name: Preparar el bucket y planificar la infraestructura de OCI
         run: bash scripts/deploy-oci.sh plan
 
-      - uses: docker/setup-qemu-action@v3
-      - uses: docker/setup-buildx-action@v3
-      - uses: docker/login-action@v3
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - uses: docker/build-push-action@v6
-        id: image
-        with:
-          context: .
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: ${{ vars.DOCKERHUB_USERNAME }}/gymturno:${{ github.sha }}
-
       - name: Aplicar el plan y ejecutar Ansible
         env:
-          APP_IMAGE: ${{ vars.DOCKERHUB_USERNAME }}/gymturno@${{ steps.image.outputs.digest }}
+          APP_IMAGE: ${{ vars.DOCKERHUB_USERNAME }}/gymturno@${{ needs.docker.outputs.digest }}
         run: bash scripts/deploy-oci.sh apply
 
       - name: Quitar el acceso SSH temporal

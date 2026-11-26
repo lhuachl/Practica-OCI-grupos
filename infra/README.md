@@ -1,6 +1,6 @@
 # Despliegue de GymTurno en Oracle Cloud
 
-Cada push a `dev` ejecuta únicamente las pruebas de Cypress. El workflow de `main` valida la infraestructura antes de publicar la imagen y desplegar. Un push a `main` crea producción la primera vez y la actualiza en despliegues posteriores. En **Actions → Despliegue de GymTurno en OCI → Run workflow**, sobre `main`, cada ejecución manual nueva crea una VM de demostración independiente. Para retomar una demostración existente indica su número de ejecución (el ID de la URL de Actions) en `resume_run_id`. Un reintento del mismo run conserva el mismo estado.
+El pipeline `.github/workflows/pipeline.yml` ejecuta en cada push a `dev` únicamente las pruebas de Cypress. En `main` repite las pruebas, valida la infraestructura, publica la imagen en Docker Hub y despliega. Un push a `main` crea producción la primera vez y la actualiza en despliegues posteriores. En **Actions → MVP CI/CD Pipeline → Run workflow**, sobre `main`, cada ejecución manual nueva crea una VM de demostración independiente. Para retomar una demostración existente indica su número de ejecución (el ID de la URL de Actions) en `resume_run_id`. Un reintento del mismo run conserva el mismo estado.
 
 ## Preparar el entorno production
 

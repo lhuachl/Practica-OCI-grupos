@@ -18,19 +18,22 @@ GymTurno ayuda a los socios de un gimnasio a planificar su visita: reservan hora
 
 ## Pipeline
 
-| Rama | Workflow | Qué hace |
+Un único archivo, `.github/workflows/pipeline.yml`, con comportamiento distinto según la rama:
+
+| Rama | Jobs | Qué hace |
 | --- | --- | --- |
-| `dev` | `.github/workflows/dev-tests.yml` | Cada push ejecuta `npm test` (unitarias, integración y E2E con Cypress). |
-| `main` | `.github/workflows/deploy-oci.yml` | Valida Terraform y Ansible, construye y publica la imagen en Docker Hub, crea la VM con Terraform y la configura con Ansible. |
+| `dev` | `test` | Cada push ejecuta las pruebas unitarias, de integración y E2E (Cypress). |
+| `main` | `test` → `validar` → `docker` → `deploy` | Repite las pruebas, valida Terraform y Ansible, publica la imagen en Docker Hub (`latest` y SHA del commit), crea la VM con Terraform y la configura con Ansible. |
+| PR hacia `main` | `test` | Solo pruebas. |
 
 ## Requisitos de la práctica
 
 | Requisito | Dónde está |
 | --- | --- |
-| Tests automáticos en `dev` | `dev-tests.yml` (rama `dev`) |
+| Tests automáticos en `dev` | job `test` de `.github/workflows/pipeline.yml` |
 | Al menos 6 tests unitarios, de integración y E2E | `test/unit` (12), `test/integration` (15), `test/e2e` (21). Detalle en [test/README.md](test/README.md) |
 | Docker: Dockerfile y Compose | [Dockerfile](Dockerfile), [compose.yml](compose.yml) |
-| Subida a Docker Hub | job `deploy` de `deploy-oci.yml` (`docker/build-push-action`) |
+| Subida a Docker Hub | job `docker` de `pipeline.yml` (`docker/build-push-action`, etiquetas `latest` y SHA) |
 | VM Ubuntu 24.04, VNC, subredes e IP pública con Terraform | [infra/oci](infra/oci) (VCN, subred pública y privada, IP pública) y [infra/ansible/vnc.yml](infra/ansible/vnc.yml) |
 | Docker, Git, firewall e iptables con puertos 80 y 443 | [infra/ansible/site.yml](infra/ansible/site.yml) (UFW, iptables y NSG de OCI) |
 | Extra: Ansible y dominio con Cloudflare | [infra/ansible/dns.yml](infra/ansible/dns.yml) y Caddy con HTTPS |
