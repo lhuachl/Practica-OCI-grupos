@@ -57,14 +57,33 @@ variable "deploy_ssh_public_key" {
 
 variable "shape" {
   type        = string
-  default     = "VM.Standard.E2.1.Micro"
+  default     = "VM.Standard.E3.Flex"
   nullable    = false
-  description = "Unidad elegible para Siempre gratis que usa GymTurno."
+  description = "Unidad x86 de la VM. La Micro es gratis, pero no existe en todas las regiones."
 
   validation {
-    condition     = var.shape == "VM.Standard.E2.1.Micro"
-    error_message = "GymTurno solo admite VM.Standard.E2.1.Micro."
+    condition = contains([
+      "VM.Standard.E2.1.Micro",
+      "VM.Standard.E3.Flex",
+      "VM.Standard.E5.Flex",
+      "VM.Standard3.Flex",
+    ], var.shape)
+    error_message = "Usa VM.Standard.E2.1.Micro, VM.Standard.E3.Flex, VM.Standard.E5.Flex o VM.Standard3.Flex."
   }
+}
+
+variable "ocpus" {
+  type        = number
+  default     = 1
+  nullable    = false
+  description = "OCPU de las unidades Flex. La Micro no usa este valor."
+}
+
+variable "memory_in_gbs" {
+  type        = number
+  default     = 6
+  nullable    = false
+  description = "Memoria en GB de las unidades Flex. La Micro no usa este valor."
 }
 
 variable "admin_cidr" {

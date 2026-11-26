@@ -35,12 +35,14 @@ Ejemplo de estructura para `OCI_TFVARS_JSON`. Sustituye los marcadores con los v
   "compartment_ocid": "<OCID del compartimento>",
   "availability_domain": "<nombre completo del AD>",
   "ubuntu_2404_image_ocid": "<OCID regional de Ubuntu 24.04>",
-  "shape": "VM.Standard.E2.1.Micro",
+  "shape": "VM.Standard.E3.Flex",
+  "ocpus": 1,
+  "memory_in_gbs": 6,
   "admin_cidr": "<IPv4 pública del administrador>/32"
 }
 ```
 
-El despliegue solicita la unidad AMD `VM.Standard.E2.1.Micro` con una imagen Ubuntu 24.04 x86 y deja que OCI elija el dominio de errores. Si OCI informa falta de capacidad después de crear la red, inicia el workflow actualizado desde `main` e indica el ID de la demostración original en `resume_run_id` para reutilizar su estado. Si el plan crea una VM, Actions consulta el informe de capacidad de OCI para la Micro en el dominio de disponibilidad solicitado. Solo continúa si OCI informa capacidad disponible. La consulta requiere permiso para crear informes de capacidad en la tenencia y no reserva un host. La VCN predeterminada usa 10.41.0.0/16, subred pública 10.41.1.0/24 y privada 10.41.2.0/24. Terraform guarda el estado de producción en `gymturno/production.tfstate` y las demostraciones en `gymturno/manual/<run-id>.tfstate`. El directorio `gymturno/hosts/` conserva la identidad SSH pública verificada de cada VM.
+El despliegue solicita la unidad indicada en `shape` (`VM.Standard.E2.1.Micro`, gratis pero no disponible en todas las regiones, o una Flex x86 de pago: `VM.Standard.E3.Flex`, `VM.Standard.E5.Flex` o `VM.Standard3.Flex`) con una imagen Ubuntu 24.04 x86 y deja que OCI elija el dominio de errores. Las unidades Flex cuestan por hora: destruye la VM al terminar la demostración. Si OCI informa falta de capacidad después de crear la red, inicia el workflow actualizado desde `main` e indica el ID de la demostración original en `resume_run_id` para reutilizar su estado. Si el plan crea una VM, Actions consulta el informe de capacidad de OCI para esa unidad en el dominio de disponibilidad solicitado. Solo continúa si OCI informa capacidad disponible. La consulta requiere permiso para crear informes de capacidad en la tenencia y no reserva un host. La VCN predeterminada usa 10.41.0.0/16, subred pública 10.41.1.0/24 y privada 10.41.2.0/24. Terraform guarda el estado de producción en `gymturno/production.tfstate` y las demostraciones en `gymturno/manual/<run-id>.tfstate`. El directorio `gymturno/hosts/` conserva la identidad SSH pública verificada de cada VM.
 
 ## Qué ocurre durante el despliegue
 

@@ -4,7 +4,16 @@ resource "oci_core_instance" "gym" {
   availability_domain = var.availability_domain
   shape               = var.shape
 
-  # OCI elige el dominio de errores disponible al crear la Micro.
+  # Las unidades Flex necesitan OCPU y memoria. La Micro tiene tamaño fijo.
+  dynamic "shape_config" {
+    for_each = endswith(var.shape, "Flex") ? [1] : []
+    content {
+      ocpus         = var.ocpus
+      memory_in_gbs = var.memory_in_gbs
+    }
+  }
+
+  # OCI elige el dominio de errores disponible al crear la VM.
   source_details {
     source_type = "image"
     source_id   = var.ubuntu_2404_image_ocid

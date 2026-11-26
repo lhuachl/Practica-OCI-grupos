@@ -1,4 +1,4 @@
-"""Comprueba la capacidad de la Micro solicitada en el plan de Terraform."""
+"""Comprueba la capacidad de la unidad solicitada en el plan de Terraform."""
 import json
 import subprocess
 import sys
@@ -14,14 +14,18 @@ def check_capacity(plan, config_path, tenancy):
     target = vm["change"]["after"]
     shape = target["shape"]
     domain = target["availability_domain"]
-    if shape != "VM.Standard.E2.1.Micro":
-        raise SystemExit("El plan solicita una unidad distinta de la Micro autorizada.")
+
+    # Las unidades Flex piden también OCPU y memoria; la Micro tiene tamaño fijo.
+    request = {"instanceShape": shape}
+    if target.get("shape_config"):
+        flex = target["shape_config"][0]
+        request["instanceShapeConfig"] = {"ocpus": flex["ocpus"], "memoryInGBs": flex["memory_in_gbs"]}
 
     # La API requiere el compartimento raíz. Omitir faultDomain consulta todo el AD.
     report = subprocess.check_output([
         "oci", "--config-file", config_path, "compute", "compute-capacity-report", "create",
         "--compartment-id", tenancy, "--availability-domain", domain,
-        "--shape-availabilities", json.dumps([{"instanceShape": shape}]), "--output", "json",
+        "--shape-availabilities", json.dumps([request]), "--output", "json",
     ], text=True)
     available = False
     for row in json.loads(report)["data"]["shape-availabilities"]:
@@ -33,7 +37,7 @@ def check_capacity(plan, config_path, tenancy):
             if status == "AVAILABLE" and (count is None or count > 0):
                 available = True
     if not available:
-        raise SystemExit("OCI no confirmó capacidad para una Micro. Reintenta más tarde.")
+        raise SystemExit(f"OCI no confirmó capacidad para {shape}. Reintenta más tarde.")
 
 
 if __name__ == "__main__":

@@ -7,7 +7,9 @@ compartment_ocid       = ""
 availability_domain    = ""
 ubuntu_2404_image_ocid = ""
 ssh_public_key_path    = ""
-shape                  = "VM.Standard.E2.1.Micro"
+shape                  = "VM.Standard.E3.Flex"
+ocpus                  = 1
+memory_in_gbs          = 6
 admin_cidr             = ""
 
 # Opcional para reutilizar una subred pública.

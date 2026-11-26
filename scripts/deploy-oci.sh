@@ -45,8 +45,8 @@ plan() {
   jq --arg api "$tmp/api.pem" --arg ssh "$tmp/vm-access.pub" --arg id "$deployment_id" --arg deploy "$deploy_public_key" '
     . + {private_key_path: $api, ssh_public_key_path: $ssh, deployment_id: null, deploy_ssh_public_key: $deploy}
     | if $id == "" then . else . + {deployment_id: $id, deploy_ssh_public_key: $deploy, subnet_ocid: null} end
-    # Terraform selecciona la Micro y OCI elige el dominio de errores.
-    | del(.shape, .flex_shape, .fault_domain)
+    # La unidad y su tamaño vienen del secreto. OCI elige el dominio de errores.
+    | del(.fault_domain)
   ' <<< "$OCI_TFVARS_JSON" > "$tmp/production.tfvars.json"
   jq -er --arg key "$tmp/api.pem" '
     "[DEFAULT]\ntenancy=\(.tenancy_ocid)\nuser=\(.user_ocid)\nfingerprint=\(.fingerprint)\nregion=\(.region)\nkey_file=\($key)"
